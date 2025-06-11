@@ -1,0 +1,50 @@
+[project]
+name = "vino-project"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "asyncpg>=0.30.0",
+    "fastapi>=0.115.12",
+    "greenlet>=3.2.3",
+    "passlib[bcrypt]>=1.7.4",
+    "pydantic-settings>=2.9.1",
+    "pyjwt>=2.10.1",
+    "python-multipart>=0.0.20",
+    "sentry-sdk>=2.27.0",
+    "sqlalchemy>=2.0.40",
+    "uvicorn>=0.34.2",
+]
+
+[tool.ruff]
+line-length = 100
+src = ["src"]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "C",    # flake8-comprehensions
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+    "UP",   # pyupgrade
+    "N",    # pep8-naming
+    "ERA",  # found commented-out code
+    "D401", # check docstring format
+]
+unfixable = ["F401"] # Prevent Ruff from auto-fixing unused imports
+ignore = [
+    "B008", # Ignore depends in function calls
+]
+exclude = [".venv", ".git", "__pycache__", "build", "dist"]
+
+[tool.black]
+# Black is disabled by omitting its configuration here.
+
+[tool.pyright]
+# Delete if you dont have mistakes
+executionEnvironments = [{ root = "src" }]
+typeCheckingMode = "standard"
+venv = ".venv"
+venvPath = "."
