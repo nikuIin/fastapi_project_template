@@ -24,6 +24,7 @@ class HostSettings(ModelConfig):
     # validation_alias – is environment variable, thats python will read, if it's exists
     host: str = Field(default="localhost", validation_alias="APP_HOST")
     port: int = Field(default=8000, validation_alias="APP_PORT")
+    is_reload: bool = Field(default=True, validation_alias="IS_APP_AUTO_RELOAD")
 
 
 class AuthSettings(ModelConfig):
