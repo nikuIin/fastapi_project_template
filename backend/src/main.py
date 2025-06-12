@@ -1,14 +1,16 @@
 from pathlib import Path
 
 from fastapi import Depends, FastAPI
-from sqlalchemy.sql import text
 from uvicorn import run as server_start
 
+from api.routes import api_router
 from core.config import host_settings
 from core.db.dependencies.db_helper import db_helper
 from core.logger.logger import get_configure_logger
 
 app = FastAPI()
+
+app.include_router(api_router)
 
 logger = get_configure_logger(Path(__file__).stem)
 
