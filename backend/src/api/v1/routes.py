@@ -4,6 +4,7 @@ from api.v1.endpoints.auth import router as auth_router
 
 v1_router = APIRouter(prefix="/v1")
 
+
 routers = [
     auth_router,
 ]
