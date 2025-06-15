@@ -8,6 +8,8 @@ from pydantic import Field
 from pydantic_settings import BaseSettings
 from pydantic_settings.main import SettingsConfigDict
 
+THIRTY_DAYS_IN_MINUTES = 42000
+
 
 # Base config class
 class ModelConfig(BaseSettings):
@@ -28,10 +30,25 @@ class HostSettings(ModelConfig):
 
 
 class AuthSettings(ModelConfig):
-    secret_key: str = Field(default="my-cool-secret-key", validation_alias="APP_SECRET_KEY")
+    access_secret_key: str = Field(
+        default="my-cool-access-secret-key", validation_alias="ACCESS_SECRET_KEY"
+    )
+    refresh_secret_key: str = Field(
+        default="my-cool-refresh-secret-key", validation_alias="REFRESH_SECRET_KEY"
+    )
+    access_cookie_name: str = Field(default="access_token", validation_alias="ACCESS_COOKIE_NAME")
+    refresh_cookie_name: str = Field(
+        default="refresh_token", validation_alias="REFRESH_COOKIE_NAME"
+    )
     algorithm: str = Field(default="HS256", validation_alias="APP_ALGORITHM")
+    token_type: str = Field(default="bearer", validation_alias="TOKEN_TYPE")
     access_token_expire_minutes: int = Field(
-        default=30, validation_alias="APP_ACCESS_TOKEN_EXPIRE_MINUTES"
+        default=30, validation_alias="ACCESS_TOKEN_EXPIRES_MINUTES"
+    )
+    refresh_token_expire_minutes: int = Field(
+        default=THIRTY_DAYS_IN_MINUTES,
+        validation_alias="REFRESH_TOKEN_EXPIRES_MINUTES",
+        description="In default 30 days (43200 minutes)",
     )
 
 
