@@ -36,7 +36,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
         + "On success the system automatically set tokens into the cookies"
     ),
     responses={
-        200: {"description": "The user successfully authentificated (get the JSON web tokens)."},
+        200: {"description": "The user successfully authenticated (get the JSON web tokens)."},
         401: {"description": "The user password or login is incorrect."},
     },
 )
