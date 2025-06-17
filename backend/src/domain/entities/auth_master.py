@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from time import time
 from uuid import UUID, uuid4
@@ -88,10 +88,10 @@ class AuthMaster:
         Returns:
             Tuple of access and refresh token payloads.
         """
-        access_expire = datetime.utcnow() + timedelta(
+        access_expire = datetime.now(tz=UTC) + timedelta(
             minutes=auth_settings.access_token_expire_minutes
         )
-        refresh_expire = datetime.utcnow() + timedelta(
+        refresh_expire = datetime.now(tz=UTC) + timedelta(
             minutes=auth_settings.refresh_token_expire_minutes
         )
 
@@ -99,14 +99,14 @@ class AuthMaster:
             user_id=str(user.user_id),
             login=user.login,
             role_id=user.role_id,
-            expire_date=access_expire.timestamp(),
+            exp=access_expire.timestamp(),
         )
         jwt_refresh_payload = RefreshTokenPayload(
             user_id=str(user.user_id),
             login=user.login,
             token_id=str(uuid4()),
             role_id=user.role_id,
-            expire_date=refresh_expire.timestamp(),
+            exp=refresh_expire.timestamp(),
         )
         logger.debug("Generated payloads for user %s", user.login)
         return jwt_access_payload, jwt_refresh_payload
@@ -225,7 +225,7 @@ class AuthMaster:
         except InvalidTokenDataError as error:
             logger.warning("Failed to decode access token: %s", error, exc_info=error)
             raise
-        if self._is_timestamp_expired(token_payload.expire_date):
+        if self._is_timestamp_expired(token_payload.exp):
             logger.debug("Access token expired for user %s", token_payload.login)
             raise TokenSessionExpiredError
         return token_payload
@@ -250,7 +250,7 @@ class AuthMaster:
         except InvalidTokenDataError as error:
             logger.warning("Failed to decode refresh token: %s", error, exc_info=error)
             raise
-        if self._is_timestamp_expired(token_payload.expire_date):
+        if self._is_timestamp_expired(token_payload.exp):
             logger.debug("Refresh token expired for user %s", token_payload.login)
             raise TokenSessionExpiredError
         if not token_payload.token_id:

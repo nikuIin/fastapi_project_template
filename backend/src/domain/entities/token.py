@@ -24,7 +24,7 @@ class TokenPayload(BaseModel):
     user_id: str = Field(description="The user UUID.")
     login: str
     role_id: int  # TODO: create enum, that contains information about user roles
-    expire_date: float = Field(
+    exp: float = Field(
         default_factory=base_expire_date,
         description="Expire date in the epoch format",
     )
@@ -48,7 +48,12 @@ class Token:
             return TokenPayload(**payload)
         except ExpiredSignatureError as error:
             raise TokenSessionExpiredError from error
-        except (ValidationError, InvalidTokenError, PyJWTError, TypeError) as error:
+        except (
+            ValidationError,
+            InvalidTokenError,
+            PyJWTError,
+            TypeError,
+        ) as error:
             raise InvalidTokenDataError from error
 
     def decode_refresh_token(self, secret_key: str, algorithm: str) -> RefreshTokenPayload:
@@ -61,7 +66,12 @@ class Token:
             return RefreshTokenPayload(**payload)
         except ExpiredSignatureError as error:
             raise TokenSessionExpiredError from error
-        except (ValidationError, InvalidTokenError, PyJWTError, TypeError) as error:
+        except (
+            ValidationError,
+            InvalidTokenError,
+            PyJWTError,
+            TypeError,
+        ) as error:
             raise InvalidTokenDataError from error
 
     def __str__(self):
