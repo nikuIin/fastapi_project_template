@@ -4,10 +4,15 @@ from pydantic import BaseModel, Field
 
 from core.general_constants import BASE_MAX_STR_LENGTH, BASE_MIN_STR_LENGTH
 
+USER_ROLE_ID = 1
+ADMIN_ROLE_ID = 2
+
+default_role = lambda: USER_ROLE_ID
+
 
 class UserBase(BaseModel):
     user_id: UUID
-    role_id: int  # TODO: create enum of user roles
+    role_id: int = Field(default_factory=default_role)  # TODO: create enum of user roles
     login: str = Field(min_length=BASE_MIN_STR_LENGTH, max_length=BASE_MAX_STR_LENGTH)
 
 
