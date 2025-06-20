@@ -9,8 +9,8 @@ from sqlalchemy.ext.asyncio import (
 
 # Import database settings from the application's configuration
 from core.config import db_settings
-from core.db.models import Base
 from core.logger.logger import get_configure_logger
+from db.models import Base
 
 logger = get_configure_logger(Path(__file__).stem)
 

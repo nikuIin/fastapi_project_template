@@ -1,7 +1,7 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.db.dependencies.postgres_helper import postgres_helper
+from db.dependencies.postgres_helper import postgres_helper
 from domain.entities.user import UserBase, UserCreate, UserCreds
 from repository.sql_queries.user_queries import CREATE_USER, GET_USER_CREDS
 

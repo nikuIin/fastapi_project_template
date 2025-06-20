@@ -5,8 +5,8 @@ from uvicorn import run as server_start
 
 from api.routes import api_router
 from core.config import host_settings
-from core.db.dependencies.postgres_helper import postgres_helper
 from core.logger.logger import get_configure_logger
+from db.dependencies.postgres_helper import postgres_helper
 
 app = FastAPI()
 
