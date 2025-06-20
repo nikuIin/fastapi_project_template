@@ -6,8 +6,8 @@ from fastapi import Depends
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.db.dependencies.postgres_helper import postgres_helper
 from core.logger.logger import get_configure_logger
+from db.dependencies.postgres_helper import postgres_helper
 from domain.entities.token import RefreshTokenPayload
 from domain.exceptions import RefreshTokenCreationError
 from repository.sql_queries.token_queries import (
