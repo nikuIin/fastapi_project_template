@@ -1,7 +1,7 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.db.dependencies.db_helper import db_helper
+from core.db.dependencies.postgres_helper import postgres_helper
 from domain.entities.user import UserBase, UserCreate, UserCreds
 from repository.sql_queries.user_queries import CREATE_USER, GET_USER_CREDS
 
@@ -12,7 +12,9 @@ class UserRepository:
 
     async def get_user_creds(self, login: str) -> UserCreds | None:
         async with self.__session as session:
-            result = await session.execute(GET_USER_CREDS, params={"login": login})
+            result = await session.execute(
+                GET_USER_CREDS, params={"login": login}
+            )
         result = result.mappings().fetchone()
 
         return UserCreds(**result) if result else None
@@ -33,5 +35,7 @@ class UserRepository:
         return UserBase(**user.model_dump())
 
 
-def user_repository_dependency(session: AsyncSession = Depends(db_helper.session_dependency)):
+def user_repository_dependency(
+    session: AsyncSession = Depends(postgres_helper.session_dependency),
+):
     return UserRepository(session=session)

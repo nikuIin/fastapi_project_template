@@ -63,7 +63,7 @@ class DatabaseHelper:
 
 
 # Create a global instance of the DatabaseHelper using settings from core.config
-db_helper = DatabaseHelper(
+postgres_helper = DatabaseHelper(
     url=db_settings.db_url,  # Get the database URL from settings
     echo=db_settings.db_echo,  # Get the echo setting from settings
 )

@@ -6,7 +6,7 @@ from fastapi import Depends
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.db.dependencies.db_helper import db_helper
+from core.db.dependencies.postgres_helper import postgres_helper
 from core.logger.logger import get_configure_logger
 from domain.entities.token import RefreshTokenPayload
 from domain.exceptions import RefreshTokenCreationError
@@ -58,5 +58,7 @@ class TokenRepository:
         return token
 
 
-def token_repository_dependency(session: AsyncSession = Depends(db_helper.session_dependency)):
+def token_repository_dependency(
+    session: AsyncSession = Depends(postgres_helper.session_dependency),
+):
     return TokenRepository(session=session)
