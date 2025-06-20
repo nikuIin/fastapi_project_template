@@ -5,6 +5,7 @@ from sqlalchemy import UUID, CheckConstraint, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.orm import Mapped, mapped_column
 
+from core.config import auth_settings
 from db.base_models import Base, TimeStampMixin
 
 
@@ -59,7 +60,10 @@ class RefreshToken(Base, TimeStampMixin):
     expire_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         nullable=False,
-        default=lambda: datetime.now() + timedelta(days=30),
+        default=lambda: (
+            datetime.now()
+            + timedelta(minutes=auth_settings.refresh_token_expire_minutes)
+        ),
     )
 
 
