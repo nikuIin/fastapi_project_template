@@ -2,6 +2,7 @@
 The main configuration file of the backend project part.
 """
 
+from enum import StrEnum, auto
 from logging import INFO
 
 from pydantic import Field
@@ -11,15 +12,25 @@ from pydantic_settings.main import SettingsConfigDict
 THIRTY_DAYS_IN_MINUTES = 42000
 
 
+class ModeEnum(StrEnum):
+    test = auto()
+    dev = auto()
+    prod = auto()
+
+
 # Base config class
 class ModelConfig(BaseSettings):
     model_config = SettingsConfigDict(
         case_sensitive=True,
-        env_file=(".env", "../../../.env"),
+        env_file=("../.env"),
         env_file_encoding="utf-8",
         # ignore extra vars in the env file
         extra="ignore",
     )
+
+
+class AppSettings(ModelConfig):
+    app_mode: ModeEnum = Field(default=ModeEnum.prod, validation_alias="APP_MODE")
 
 
 class HostSettings(ModelConfig):
@@ -96,3 +107,4 @@ host_settings = HostSettings()
 auth_settings = AuthSettings()
 db_settings = DBSettings()
 log_settings = LoggingSettings()
+app_settings = AppSettings()

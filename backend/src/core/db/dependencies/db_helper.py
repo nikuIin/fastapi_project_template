@@ -1,3 +1,5 @@
+from pathlib import Path
+
 # Import necessary components from SQLAlchemy for asynchronous operations
 from sqlalchemy.ext.asyncio import (
     AsyncSession,  # Represents an asynchronous database session
@@ -7,6 +9,10 @@ from sqlalchemy.ext.asyncio import (
 
 # Import database settings from the application's configuration
 from core.config import db_settings
+from core.db.models import Base
+from core.logger.logger import get_configure_logger
+
+logger = get_configure_logger(Path(__file__).stem)
 
 
 # Helper class to manage database connections and sessions
@@ -33,7 +39,7 @@ class DatabaseHelper:
 
     # Async generator method to provide database sessions
     # Useful as a dependency in web frameworks (like FastAPI Depends)
-    async def session_dependency(self) -> AsyncSession:
+    async def session_dependency(self) -> AsyncSession:  # type: ignore
         """
         Provide an asynchronous database session and ensures it is closed afterwards.
         This is designed to be used as an async generator dependency.
@@ -41,9 +47,19 @@ class DatabaseHelper:
         # Use the session factory to create a new session within a context manager
         async with self.session_factory() as session:
             # Yield the session to the consumer (e.g., a FastAPI endpoint)
-            yield session
+            yield session  # type: ignore
             # Ensure the session is closed after the consumer is done
             await session.close()
+
+    async def create_tables(self) -> None:
+        async with self.engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+            await conn.commit()
+
+    async def drop_database(self) -> None:
+        async with self.engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+            await conn.commit()
 
 
 # Create a global instance of the DatabaseHelper using settings from core.config
