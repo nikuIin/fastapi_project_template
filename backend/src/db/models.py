@@ -13,9 +13,15 @@ class Role(Base):
     __tablename__ = "role"
 
     role_id: Mapped[int] = mapped_column(
-        Integer, primary_key=True, autoincrement=True
+        Integer,
+        primary_key=True,
+        autoincrement=True,
     )
-    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    name: Mapped[str] = mapped_column(
+        String(256),
+        nullable=False,
+        unique=True,
+    )
 
     __table_args__ = (
         CheckConstraint("length(name) > 0", name="role_name_check"),

@@ -4,13 +4,20 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from core.config import db_settings
-from db.models import Base
+
+# import all models BEFORE Base model
+# if you don't do this, the alembic will create the empty database
+from db import models  # type: ignore # noqa
+from db.base_models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-config.set_main_option("sqlalchemy.url", db_settings.db_url)
+config.set_main_option(
+    "sqlalchemy.url", db_settings.db_url + "?async_fallback=True"
+)
+
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -68,7 +75,9 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            compare_server_default=True,
         )
 
         with context.begin_transaction():
