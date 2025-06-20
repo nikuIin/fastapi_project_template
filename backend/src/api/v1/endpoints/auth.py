@@ -36,7 +36,9 @@ router = APIRouter(prefix="/auth", tags=["auth"])
         + "On success the system automatically set tokens into the cookies"
     ),
     responses={
-        200: {"description": "The user successfully authenticated (get the JSON web tokens)."},
+        200: {
+            "description": "The user successfully authenticated (get the JSON web tokens)."
+        },
         401: {"description": "The user password or login is incorrect."},
     },
 )
@@ -51,7 +53,9 @@ async def get_tokens(
     """
     try:
         # get user hash password from database
-        user_creds: UserCreds | None = await user_service.get_user_creds(login=user_in.login)
+        user_creds: UserCreds | None = await user_service.get_user_creds(
+            login=user_in.login
+        )
         if not user_creds:
             raise HTTPException(
                 status_code=HTTPStatus.UNAUTHORIZED,
@@ -65,7 +69,9 @@ async def get_tokens(
             # on success generate and return JWT:
             user = UserBase(**user_creds.model_dump())
 
-            tokens = await auth_master.generate_and_set_tokens(user=user, response=response)
+            tokens = await auth_master.generate_and_set_tokens(
+                user=user, response=response
+            )
             access_token, refresh_token = tokens.values()
 
             return TokensResponse(
@@ -75,7 +81,8 @@ async def get_tokens(
 
         # else return 403 error
         raise HTTPException(
-            status_code=HTTPStatus.UNAUTHORIZED, detail="Login or password is incorrect."
+            status_code=HTTPStatus.UNAUTHORIZED,
+            detail="Login or password is incorrect.",
         )
     except RefreshTokenIdAbsenceError:
         raise HTTPException(
@@ -84,7 +91,8 @@ async def get_tokens(
         ) from RefreshTokenIdAbsenceError
     except RefreshTokenCreationError:
         raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Error with creating JWT token"
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Error with creating JWT token",
         ) from RefreshTokenCreationError
 
 
@@ -104,7 +112,9 @@ async def register_user(
             )
         )
 
-        tokens = await auth_master.generate_and_set_tokens(user=user, response=response)
+        tokens = await auth_master.generate_and_set_tokens(
+            user=user, response=response
+        )
         access_token, refresh_token = tokens.values()
 
         return TokensResponse(
@@ -125,19 +135,27 @@ async def refresh_tokens(
 ):
     try:
         # this function will take jwt from the cookies, decode and validate it
-        refresh_token_payload = await auth_master.get_refresh_token_from_cookies(request=request)
+        refresh_token_payload = (
+            await auth_master.get_refresh_token_from_cookies(request=request)
+        )
 
         # if the refresh cookie successfully validated, generate new payloads and JWT
         user = UserBase(**refresh_token_payload.model_dump())
 
-        tokens = await auth_master.generate_and_set_tokens(user=user, response=response)
+        tokens = await auth_master.generate_and_set_tokens(
+            user=user, response=response
+        )
         access_token, refresh_token = tokens.values()
 
         return TokensResponse(
             access_token=str(access_token),
             refresh_token=str(refresh_token),
         )
-    except (TokenSessionExpiredError, InvalidTokenDataError, RefreshTokenBlackListError) as error:
+    except (
+        TokenSessionExpiredError,
+        InvalidTokenDataError,
+        RefreshTokenBlackListError,
+    ) as error:
         logger.debug(error, exc_info=error)
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN,
@@ -150,10 +168,13 @@ async def refresh_tokens(
         ) from error
     except RefreshTokenCreationError:
         raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Error with creating JWT token"
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Error with creating JWT token",
         ) from RefreshTokenCreationError
 
 
 @router.get("/protected")
-def protecded_example(request: Request, auth_dependency=Depends(auth_dependency)):
+def protecded_example(
+    request: Request, auth_dependency=Depends(auth_dependency)
+):
     return {"status": "success"}

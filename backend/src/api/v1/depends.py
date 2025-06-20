@@ -14,8 +14,14 @@ from domain.exceptions import (
     InvalidTokenDataError,
     TokenSessionExpiredError,
 )
-from repository.token_repository import TokenRepository, token_repository_dependency
-from repository.user_repository import UserRepository, user_repository_dependency
+from repository.token_repository import (
+    TokenRepository,
+    token_repository_dependency,
+)
+from repository.user_repository import (
+    UserRepository,
+    user_repository_dependency,
+)
 from use_cases.token_service import TokenService
 from use_cases.user_service import UserService
 
@@ -26,7 +32,9 @@ def token_service_dependency(
     return TokenService(token_repository=token_repository)
 
 
-def user_service_dependency(user_repository: UserRepository = Depends(user_repository_dependency)):
+def user_service_dependency(
+    user_repository: UserRepository = Depends(user_repository_dependency),
+):
     return UserService(user_repository=user_repository)
 
 
@@ -49,7 +57,9 @@ def auth_master_dependency(
     )
 
 
-def auth_dependency(request: Request, auth_master: AuthMaster = Depends(auth_master_dependency)):
+def auth_dependency(
+    request: Request, auth_master: AuthMaster = Depends(auth_master_dependency)
+):
     """FastAPI dependency that provides auth checking
 
     Args:
@@ -60,5 +70,11 @@ def auth_dependency(request: Request, auth_master: AuthMaster = Depends(auth_mas
     """
     try:
         auth_master.auth_check(request=request)
-    except (AccessTokenAbsenceError, InvalidTokenDataError, TokenSessionExpiredError) as error:
-        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail=str(error)) from error
+    except (
+        AccessTokenAbsenceError,
+        InvalidTokenDataError,
+        TokenSessionExpiredError,
+    ) as error:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail=str(error)
+        ) from error
