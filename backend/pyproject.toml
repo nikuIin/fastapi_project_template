@@ -48,3 +48,10 @@ exclude = [".venv", ".git", "__pycache__", "build", "dist"]
 
 [tool.uv.workspace]
 members = ["venv"]
+
+[tool.pyright]
+# Delete if you dont have mistakes
+executionEnvironments = [{ root = "src" }]
+typeCheckingMode = "standard"
+venv = ".venv"
+venvPath = "."
