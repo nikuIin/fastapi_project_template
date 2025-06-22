@@ -198,38 +198,6 @@ class AuthMaster:
         return {"access_token": access_token, "refresh_token": refresh_token}
 
     def decode_access_token(self, token: Token) -> TokenPayload:
-        """Decode an access token into its payload.
-
-        Args:
-            token: Token object containing the JWT.
-
-        Returns:
-            Decoded TokenPayload.
-
-        Raises:
-            InvalidTokenDataError: If decoding fails.
-        """
-        return token.decode_access_token(
-            secret_key=self._access_secret_key, algorithm=self._algorithm
-        )
-
-    def decode_refresh_token(self, token: Token) -> RefreshTokenPayload:
-        """Decode a refresh token into its payload.
-
-        Args:
-            token: Token object containing the JWT.
-
-        Returns:
-            Decoded RefreshTokenPayload.
-
-        Raises:
-            InvalidTokenDataError: If decoding fails.
-        """
-        return token.decode_refresh_token(
-            secret_key=self._refresh_secret_key, algorithm=self._algorithm
-        )
-
-    def validate_access_token(self, token: Token) -> TokenPayload:
         """Validate an access token (signature and expiry).
 
         Args:
@@ -243,7 +211,9 @@ class AuthMaster:
             TokenSessionExpiredError: If token is expired.
         """
         try:
-            token_payload = self.decode_access_token(token=token)
+            token_payload = token.decode_access_token(
+                secret_key=self._access_secret_key, algorithm=self._algorithm
+            )
         except InvalidTokenDataError as error:
             logger.warning(
                 "Failed to decode access token: %s", error, exc_info=error
@@ -256,9 +226,7 @@ class AuthMaster:
             raise TokenSessionExpiredError
         return token_payload
 
-    async def validate_refresh_token(
-        self, token: Token
-    ) -> RefreshTokenPayload:
+    async def decode_refresh_token(self, token: Token) -> RefreshTokenPayload:
         """Validate a refresh token (signature, expiry, and blacklist).
 
         Args:
@@ -274,7 +242,9 @@ class AuthMaster:
             ValueError: If token_service is not initialized.
         """
         try:
-            token_payload = self.decode_refresh_token(token=token)
+            token_payload = token.decode_refresh_token(
+                secret_key=self._refresh_secret_key, algorithm=self._algorithm
+            )
         except InvalidTokenDataError as error:
             logger.warning(
                 "Failed to decode refresh token: %s", error, exc_info=error
@@ -311,7 +281,7 @@ class AuthMaster:
             request=request, cookie_key=auth_settings.access_cookie_name
         )
         # validate token and get payload
-        token = self.validate_access_token(token=token)
+        token = self.decode_access_token(token=token)
 
     def set_jwt_to_cookies(
         self, response: Response, access_token: Token, refresh_token: Token
@@ -397,7 +367,7 @@ class AuthMaster:
         token = self._get_token_from_cookies(
             request, auth_settings.access_cookie_name
         )
-        return self.validate_access_token(token=token)
+        return self.decode_access_token(token=token)
 
     async def get_refresh_token_from_cookies(
         self, request: Request
@@ -420,4 +390,4 @@ class AuthMaster:
             request, auth_settings.refresh_cookie_name
         )
         logger.debug("Refresh token from cookies: %s", token)
-        return await self.validate_refresh_token(token=token)
+        return await self.decode_refresh_token(token=token)
