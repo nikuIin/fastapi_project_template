@@ -76,10 +76,14 @@ class AuthMaster:
         Returns:
             True if the timestamp is expired, False otherwise.
         """
-        logger.debug("Current time: %s, Token expires at: %s", time(), timestamp)
+        logger.debug(
+            "Current time: %s, Token expires at: %s", time(), timestamp
+        )
         return timestamp < time()
 
-    def generate_jwt_payloads(self, user: UserBase) -> tuple[TokenPayload, RefreshTokenPayload]:
+    def generate_jwt_payloads(
+        self, user: UserBase
+    ) -> tuple[TokenPayload, RefreshTokenPayload]:
         """Generate access and refresh token payloads for a user.
 
         Args:
@@ -121,7 +125,9 @@ class AuthMaster:
         Returns:
             Token object containing the encoded JWT.
         """
-        token = jwt_encode(payload=payload, key=secret_key, algorithm=self._algorithm)
+        token = jwt_encode(
+            payload=payload, key=secret_key, algorithm=self._algorithm
+        )
         return Token(token=token)
 
     def generate_access_token(self, token_payload: TokenPayload) -> Token:
@@ -134,10 +140,13 @@ class AuthMaster:
             Token object containing the encoded access JWT.
         """
         return self._encode_jwt(
-            payload=token_payload.model_dump(), secret_key=self._access_secret_key
+            payload=token_payload.model_dump(),
+            secret_key=self._access_secret_key,
         )
 
-    async def generate_refresh_token(self, token_payload: RefreshTokenPayload) -> Token:
+    async def generate_refresh_token(
+        self, token_payload: RefreshTokenPayload
+    ) -> Token:
         """Generate a refresh token JWT and persists it in the database.
 
         Args:
@@ -150,13 +159,18 @@ class AuthMaster:
             ValueError: If token_service is not initialized.
         """
         if not self._token_service:
-            raise ValueError("TokenService is required for refresh token generation")
+            raise ValueError(
+                "TokenService is required for refresh token generation"
+            )
         await self._token_service.create_or_update_refresh_token(token_payload)
         return self._encode_jwt(
-            payload=token_payload.model_dump(), secret_key=self._refresh_secret_key
+            payload=token_payload.model_dump(),
+            secret_key=self._refresh_secret_key,
         )
 
-    async def generate_and_set_tokens(self, response: Response, user: UserBase) -> dict:
+    async def generate_and_set_tokens(
+        self, response: Response, user: UserBase
+    ) -> dict:  # TODO: remove this function. 1 func do only one thing
         """Generate JWT tokens and sets them as cookies.
 
         Args:
@@ -166,11 +180,19 @@ class AuthMaster:
         Returns:
             Dictionary with access_token and refresh_token strings.
         """
-        jwt_access_payload, jwt_refresh_payload = self.generate_jwt_payloads(user=user)
-        access_token = self.generate_access_token(token_payload=jwt_access_payload)
-        refresh_token = await self.generate_refresh_token(token_payload=jwt_refresh_payload)
+        jwt_access_payload, jwt_refresh_payload = self.generate_jwt_payloads(
+            user=user
+        )
+        access_token = self.generate_access_token(
+            token_payload=jwt_access_payload
+        )
+        refresh_token = await self.generate_refresh_token(
+            token_payload=jwt_refresh_payload
+        )
         self.set_jwt_to_cookies(
-            response=response, access_token=access_token, refresh_token=refresh_token
+            response=response,
+            access_token=access_token,
+            refresh_token=refresh_token,
         )
         logger.debug("Tokens generated and set for user %s", user.login)
         return {"access_token": access_token, "refresh_token": refresh_token}
@@ -223,14 +245,20 @@ class AuthMaster:
         try:
             token_payload = self.decode_access_token(token=token)
         except InvalidTokenDataError as error:
-            logger.warning("Failed to decode access token: %s", error, exc_info=error)
+            logger.warning(
+                "Failed to decode access token: %s", error, exc_info=error
+            )
             raise
         if self._is_timestamp_expired(token_payload.exp):
-            logger.debug("Access token expired for user %s", token_payload.login)
+            logger.debug(
+                "Access token expired for user %s", token_payload.login
+            )
             raise TokenSessionExpiredError
         return token_payload
 
-    async def validate_refresh_token(self, token: Token) -> RefreshTokenPayload:
+    async def validate_refresh_token(
+        self, token: Token
+    ) -> RefreshTokenPayload:
         """Validate a refresh token (signature, expiry, and blacklist).
 
         Args:
@@ -248,10 +276,14 @@ class AuthMaster:
         try:
             token_payload = self.decode_refresh_token(token=token)
         except InvalidTokenDataError as error:
-            logger.warning("Failed to decode refresh token: %s", error, exc_info=error)
+            logger.warning(
+                "Failed to decode refresh token: %s", error, exc_info=error
+            )
             raise
         if self._is_timestamp_expired(token_payload.exp):
-            logger.debug("Refresh token expired for user %s", token_payload.login)
+            logger.debug(
+                "Refresh token expired for user %s", token_payload.login
+            )
             raise TokenSessionExpiredError
         if not token_payload.token_id:
             logger.warning("Refresh token missing token_id")
@@ -259,12 +291,18 @@ class AuthMaster:
         try:
             token_id_uuid = UUID(token_payload.token_id)
         except ValueError as error:
-            logger.warning("Invalid token_id format: %s", token_payload.token_id)
+            logger.warning(
+                "Invalid token_id format: %s", token_payload.token_id
+            )
             raise InvalidTokenDataError("Invalid token_id format") from error
         if not self._token_service:
-            raise ValueError("TokenService is required for refresh token validation")
+            raise ValueError(
+                "TokenService is required for refresh token validation"
+            )
         if await self._token_service.is_token_in_black_list(token_id_uuid):
-            logger.debug("Refresh token %s is blacklisted", token_payload.token_id)
+            logger.debug(
+                "Refresh token %s is blacklisted", token_payload.token_id
+            )
             raise RefreshTokenBlackListError("Refresh token is blacklisted")
         return token_payload
 
@@ -318,7 +356,9 @@ class AuthMaster:
         response.delete_cookie(key=auth_settings.refresh_cookie_name)
         logger.debug("JWT cookies cleared")
 
-    def _get_token_from_cookies(self, request: Request, cookie_key: str) -> Token:
+    def _get_token_from_cookies(
+        self, request: Request, cookie_key: str
+    ) -> Token:
         """Retrieve a token from cookies.
 
         Args:
@@ -354,10 +394,14 @@ class AuthMaster:
             InvalidTokenDataError: If decoding fails.
             TokenSessionExpiredError: If token is expired.
         """
-        token = self._get_token_from_cookies(request, auth_settings.access_cookie_name)
+        token = self._get_token_from_cookies(
+            request, auth_settings.access_cookie_name
+        )
         return self.validate_access_token(token=token)
 
-    async def get_refresh_token_from_cookies(self, request: Request) -> RefreshTokenPayload:
+    async def get_refresh_token_from_cookies(
+        self, request: Request
+    ) -> RefreshTokenPayload:
         """Retrieve and validates the refresh token from cookies.
 
         Args:
@@ -372,6 +416,8 @@ class AuthMaster:
             TokenSessionExpiredError: If token is expired.
             RefreshTokenBlackListError: If token is blacklisted.
         """
-        token = self._get_token_from_cookies(request, auth_settings.refresh_cookie_name)
+        token = self._get_token_from_cookies(
+            request, auth_settings.refresh_cookie_name
+        )
         logger.debug("Refresh token from cookies: %s", token)
         return await self.validate_refresh_token(token=token)

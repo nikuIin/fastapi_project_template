@@ -1,3 +1,4 @@
+# ruff: noqa: I001
 from pathlib import Path
 
 # Import necessary components from SQLAlchemy for asynchronous operations
@@ -10,7 +11,10 @@ from sqlalchemy.ext.asyncio import (
 # Import database settings from the application's configuration
 from core.config import db_settings
 from core.logger.logger import get_configure_logger
-from db.models import Base
+
+# import all models BEFORE initialization the Base class
+from db.models import *  # noqa
+from db.base_models import Base
 
 logger = get_configure_logger(Path(__file__).stem)
 
