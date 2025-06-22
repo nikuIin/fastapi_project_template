@@ -133,13 +133,24 @@ async def refresh_tokens(
     response: Response,
     auth_master: AuthMaster = Depends(auth_master_dependency),
 ):
+    """Refresh access token and rotate refresh-token.
+
+    Args:
+        request: FastAPI request object.
+        response: FastAPI response object.
+        auth_master: AuthMaster dependency.
+
+    Returns:
+        TokensResponse: Response containing access and refresh tokens.
+    """
     try:
-        # this function will take jwt from the cookies, decode and validate it
+        # this function will take decoded jwt from the cookies
         refresh_token_payload = (
             await auth_master.get_refresh_token_from_cookies(request=request)
         )
 
-        # if the refresh cookie successfully validated, generate new payloads and JWT
+        # if the refresh cookie successfully validated
+        # then generate new payloads and JWT
         user = UserBase(**refresh_token_payload.model_dump())
 
         tokens = await auth_master.generate_and_set_tokens(
