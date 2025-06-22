@@ -185,7 +185,5 @@ async def refresh_tokens(
 
 
 @router.get("/protected")
-def protecded_example(
-    request: Request, auth_dependency=Depends(auth_dependency)
-):
+def protecded_example(auth_dependency=Depends(auth_dependency)):
     return {"status": "success"}
