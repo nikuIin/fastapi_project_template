@@ -35,6 +35,20 @@ services:
       - "8000:8000"
     networks:
       - base-fastapi-app-network
+  nginx:
+    image: nginx-fastapi-base-app:1.0
+    build:
+      context: nginx/
+    container_name: nginx-fastapi-base-cnt
+    volumes:
+      - ./static:/var/www/static
+    depends_on:
+      - db
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - base-fastapi-app-network
 
 networks:
   base-fastapi-app-network:

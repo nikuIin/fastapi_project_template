@@ -36,7 +36,8 @@ class AppSettings(ModelConfig):
 
 
 class HostSettings(ModelConfig):
-    # validation_alias – is environment variable, thats python will read, if it's exists
+    # validation_alias – is environment variable,
+    #  thats python will read, if it's exists
     host: str = Field(default="localhost", validation_alias="APP_HOST")
     port: int = Field(default=8000, validation_alias="APP_PORT")
     is_reload: bool = Field(
@@ -101,7 +102,10 @@ class LoggingSettings(ModelConfig):
         default="%Y-%m-%d %H:%M:%S", validation_alias="DATE_FORMAT"
     )
     log_format: str = Field(
-        default="[%(asctime)s.%(msecs)03d] %(name)-30s:%(lineno)-3d %(levelname)-7s - %(message)s",
+        default=(
+            "[%(asctime)s.%(msecs)03d] %(name)-30s:%(lineno)-3d"
+            + "%(levelname)-7s - %(message)s"
+        ),
         validation_alias="LOG_FORMAT",
     )
     log_roating: str = Field(
